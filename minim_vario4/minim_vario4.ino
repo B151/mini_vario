@@ -130,6 +130,8 @@ barometricSensor.setResolution(ms5637_resolution_osr_8192);
  //display.setFont (&FreeMonoBold18pt7b);
     
 }
+
+///////////////bargraph
 void drawBar (float nPer){
 
   if(nPer < LastPercent){
