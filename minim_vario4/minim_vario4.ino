@@ -198,15 +198,16 @@ void loop ( )
   if (tempo>100){      //Primi dieci secondi non beeppo
     if ((tempo-beep)>periodoBeep){
           beep=tempo;
-         if (vario>0.08 && vario<10 ){
+         if (vario>0.08 && vario<0.9 ){
           
-            periodoBeep=300;
+            periodoBeep=280;
             tone(buzzPin,530+(500*vario) ,100);
            
                      }
- /*if (vario>.5 && vario<.8 ){
+                     
+ if (vario>1 && vario<10 ){
             periodoBeep=200;
-            tone(buzzPin,500+100*vario ,100);}*/
+            tone(buzzPin,700+100*vario ,100);}
                      
            if (vario<-3){
             periodoBeep=200;
