@@ -218,11 +218,13 @@ void loop ( )
     display.setTextColor(BLACK,WHITE);
 dtostrf (vario, 5, 2, buf);
 //Serial.println (variobuf);
+display.setTextSize(3);
     display.print (buf);
-    display.setCursor(5,60);
+    display.setCursor(5,80);
     dtostrf (baltitude, 4,0, buf);
-    display.print (buf);
-    display.setCursor(5,75);
+      display.print (buf);
+     display.setTextSize(2);
+    display.setCursor(5,125);
     display.print (pressure);
  varioold=vario;
   newPercent = int((vario/3)* 100.0);
