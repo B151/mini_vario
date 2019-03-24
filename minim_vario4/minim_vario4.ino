@@ -151,7 +151,7 @@ void loop ( )
       //display.clearDisplay();
  //display.refresh();
 
-  //float temperature = bmp085GetTemperature ( bmp085ReadUT ( ) ) ; 
+  float temperature = barometricSensor.getTemperature() ; 
   float pressure = barometricSensor.getPressure(); 
   float atm = pressure / 101325; // "standard atmosphere"
   float baltitude = calcAltitude(pressure); //Uncompensated caculation - in Meters 
@@ -225,10 +225,15 @@ display.setTextSize(3);
     display.setCursor(5,80);
     display.setTextSize(4);
     dtostrf (baltitude, 4,0, buf);
-      display.print (buf);display.print ("m");
+      display.print (buf);display.setTextSize(2);display.print ("m");
      display.setTextSize(2);
     display.setCursor(5,125);
     display.print (pressure);
+    display.setCursor(5,140);
+    display.print (temperature);
+
+
+    
  varioold=vario;
   newPercent = int((vario/3)* 100.0);
  if (newPercent != LastPercent){
