@@ -13,6 +13,7 @@ http://taturno.com/code/VariometroV2.pde
 #include <Fonts/FreeSansBold18pt7b.h>
 #include <Fonts/FreeMonoBold18pt7b.h>
 #include <Fonts/FreeMonoBold24pt7b.h>
+#include <Fonts/FreeMonoBold12pt7b.h>
 #include <avr/dtostrf.h>
 
 // any pins can be used  - DO NOT use real SPI!
@@ -150,7 +151,7 @@ void drawBar (float nPer){
 void loop ( ) 
 {
      display.setCursor(5,25);
-     display.fillRect(12, 0, 130, 100, WHITE);
+     display.fillRect(12, 0, 150, 180, WHITE);
     //  display.setTextColor(WHITE,WHITE);
     //display.print(buf);
       //display.clearDisplay();
@@ -223,7 +224,7 @@ void loop ( )
       display.setCursor(18,35);
     display.setTextColor(BLACK,WHITE);
     display.setFont (&FreeMonoBold18pt7b);
-    dtostrf (vario, 5, 2, buf);
+    dtostrf (vario,5, 2, buf);
 //Serial.println (variobuf);
     display.setTextSize(1);
     display.print (buf);
@@ -236,13 +237,19 @@ void loop ( )
       dtostrf (baltitude, 4,0, buf);
       display.print (buf);
       display.setFont ();
-      display.setTextSize(1);display.print ("m");
+      display.setTextSize(2);display.print ("m");
       
+   
+    
     display.setTextSize(2);
-    display.setCursor(25,125);
+    //display.setFont (&FreeMonoBold12pt7b);
+    display.setCursor(25,120);
+    dtostrf (temperature, 5,2, buf);
+    display.print (buf); display.print (char(247));
+
+    display.setTextSize(2);
+    display.setCursor(25,145);
     display.print (pressure);
-    display.setCursor(25,140);
-    display.print (temperature);
 
 
     
