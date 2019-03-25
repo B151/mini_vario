@@ -34,37 +34,15 @@ Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 144, 168);
 MS5637 barometricSensor;
 
 /////
-const unsigned char OSS = 0;  // Oversampling Setting
-char buf [4];
-// Calibration values
-int ac1;
-int ac2;
-int ac3;
-unsigned int ac4;
-unsigned int ac5;
-unsigned int ac6;
-int b1;
-int b2;
-int mb;
-int mc;
-int md;
-
-// b5 is calculated in bmp085GetTemperature(...), this variable is also used in bmp085GetPressure(...)
-// so ...Temperature(...) must be called before ...Pressure(...).
-long b5; 
-int Conta=0;
-int sec=0;
-
-float m1=0;
-float m2=0;
+char buf [4]; // buffer for dtostrf
 int buzzPin = 2;
-int intervallo=50; //100
+int interval=50; //100
 int samples=40;//40
-int maxsamples=40;//50
+int maxsamples=50;//50
 float alt[51];
 float tim[51];
 float beep;
-float periodoBeep;
+float Beep_period;
 float varioold = 0;
 
 float LastPercent = 0;
@@ -93,7 +71,7 @@ void setup(void) {
   Serial.begin(9600);
    //while (!Serial);
   Serial.println("minimal Audio vario");
-   periodoBeep=500;
+   Beep_period=500;
 
   Wire.begin();
   
@@ -150,29 +128,23 @@ void drawBar (float nPer){
 }
 void loop ( ) 
 {
-     display.setCursor(5,25);
-     display.fillRect(12, 0, 150, 180, WHITE);
-    //  display.setTextColor(WHITE,WHITE);
-    //display.print(buf);
-      //display.clearDisplay();
- //display.refresh();
-
+   
+// read MS5637
   float temperature = barometricSensor.getTemperature() ; 
   float pressure = barometricSensor.getPressure(); 
-  float atm = pressure / 101325; // "standard atmosphere"
-  float baltitude = calcAltitude(pressure); //Uncompensated caculation - in Meters 
+  float atm = pressure / 1013.25; // "standard atmosphere"
+  float baltitude = calcAltitude(pressure); //caculation - in Meters 
   float tempo=millis();
 
-  // Buffero i samples nei vettori fifo di altezza e tempo
+ // Buffer the samples in the vectors fifo of height and time 
   for(int cc=1;cc<=maxsamples;cc++){
     alt[(cc-1)]=alt[cc];
     tim[(cc-1)]=tim[cc];
-  };
+  }
   alt[maxsamples]=baltitude;
   tim[maxsamples]=tempo;
   
-  // Effettuo l'interpolazione lineare (minimi quadrati) per determinare il 
-  // tasso di varazione verticale
+  // Linear interpolation (least squares) to determine the vertical variation rate 
   float stime=tim[maxsamples-samples];
   float N1=0;
   float N2=0;
@@ -185,43 +157,40 @@ void loop ( )
       N3+=(alt[cc]);
       D1+=(tim[cc]-stime)*(tim[cc]-stime);
       D2+=(tim[cc]-stime);
-  };
+  }
   float vario=0;
   vario=1000*((samples*N1)-N2*N3)/(samples*D1 - D2*D2);
-/*Serial.print(0.1);
-  Serial.print(" ");
-  Serial.print(1);
-  Serial.print(" ");*/
 
-
- 
     
 //Serial.println(vario);
   //Serial.print(" ");
-  //display.refresh();
+ 
  
   // Output audio 
-  if (tempo>100){      //Primi dieci secondi non beeppo
-    if ((tempo-beep)>periodoBeep){
+  if (tempo>50){     
+    if ((tempo-beep)>Beep_period){
           beep=tempo;
-         if (vario>0.08 && vario<0.9 ){
-          
-            periodoBeep=280;
-            tone(buzzPin,530+(500*vario) ,100);
-           
-                     }
-                     
- if (vario>1 && vario<10 ){
-            periodoBeep=200;
-            tone(buzzPin,700+100*vario ,100);}
+         if (vario>0.05 && vario<0.99 ){
+           Beep_period=280;
+           tone(buzzPin,530+(500*vario) ,100);
+                }
+                 if (vario>1 && vario<10 ){
+                 Beep_period=150;
+                 tone(buzzPin,700+100*vario ,100);
+                 }
                      
            if (vario<-3){
-            periodoBeep=200;
+            Beep_period=200;
             tone(buzzPin,1500,200);
           }
     }
   } 
-      display.setCursor(18,35);
+
+//Clear screen
+  display.setCursor(5,25);
+  display.fillRect(12, 0, 150, 180, WHITE);
+     //print vario
+    display.setCursor(18,35);
     display.setTextColor(BLACK,WHITE);
     display.setFont (&FreeMonoBold18pt7b);
     dtostrf (vario,5, 2, buf);
@@ -231,7 +200,7 @@ void loop ( )
     display.setFont ();
     display.setTextSize(1);
     display.print ("m/s");
-    
+    //print altitude
       display.setCursor(15,80);
       display.setFont (&FreeMonoBold24pt7b);
       dtostrf (baltitude, 4,0, buf);
@@ -240,23 +209,63 @@ void loop ( )
       display.setTextSize(2);display.print ("m");
       
    
-    
-    display.setTextSize(2);
+    //print temperature
+    display.setTextSize(3);
     //display.setFont (&FreeMonoBold12pt7b);
     display.setCursor(25,120);
     dtostrf (temperature, 5,2, buf);
-    display.print (buf); display.print (char(247));
-
+    display.print (buf);display.setTextSize(1); display.print (char(247));display.print ("C");
+    //print pressure
     display.setTextSize(2);
     display.setCursor(25,145);
     display.print (pressure);
-
-
     
- varioold=vario;
+// draw vario bar graph
   newPercent = int((vario/3)* 100.0);
  if (newPercent != LastPercent){
       drawBar(newPercent);        
     display.refresh();
 }
 }
+
+/*
+ * 
+ * #include <pins_arduino.h>
+ void loop() {
+
+  analogReadResolution(10);
+  analogReference(AR_INTERNAL1V0); //AR_DEFAULT: the default analog reference of 3.3V // AR_INTERNAL1V0: a built-in 1.0V reference
+  
+  // read the input on analog pin 0:
+  int sensorValue = analogRead(ADC_BATTERY);
+  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 4.3V):
+  float voltage = sensorValue * (3.25 / 1023.0);
+  // print out the value you read:
+  Serial.print(voltage);
+  Serial.println("V");
+------------------------------------------------------------------------------
+  float battery_voltage = 3.01; // use voltmeter
+
+analogReadResolution(10);
+  analogReference(AR_INTERNAL1V0); //AR_DEFAULT: the default analog reference of 3.3V // 
+AR_INTERNAL1V0: a built-in 1.0V reference
+  // read the input on analog pin 0:
+  int sensorValue = analogRead(ADC_BATTERY);
+  // Convert the analog reading (which goes from 0 - 1023) 
+  float voltage = sensorValue * (battery_voltage / 1023.0);
+  // print out the value you read:
+  Serial.print("Voltage: ");
+  Serial.print(voltage);
+  Serial.println("V");
+
+  float battery_percentage = ((voltage * 100) / battery_voltage);
+
+  Serial.print("Batery Percentage: ");
+  Serial.print(battery_percentage);
+  Serial.println("%");
+
+  analogReference(AR_DEFAULT);
+
+
+}*/
+
