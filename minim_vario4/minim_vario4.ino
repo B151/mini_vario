@@ -12,6 +12,7 @@ http://taturno.com/code/VariometroV2.pde
 #include <Adafruit_SharpMem.h>
 #include <Fonts/FreeSansBold18pt7b.h>
 #include <Fonts/FreeMonoBold18pt7b.h>
+#include <Fonts/FreeMonoBold24pt7b.h>
 #include <avr/dtostrf.h>
 
 // any pins can be used  - DO NOT use real SPI!
@@ -100,8 +101,12 @@ void setup(void) {
   display.clearDisplay();
   display.setTextSize(2);
     display.setTextColor(BLACK);
-    display.setCursor(5,50);
+    display.setCursor(12,50);
     display.println("MINI Vario");
+      display.setTextSize(2);
+    display.println("");
+       display.setTextSize(2);
+    display.println("    0.2  ");
     display.refresh();
 delay(5000);
 display.clearDisplay();
@@ -127,7 +132,7 @@ barometricSensor.setResolution(ms5637_resolution_osr_8192);
    display.setRotation(0);
    display.setTextSize(2);
   display.setTextColor(BLACK);
- //display.setFont (&FreeMonoBold18pt7b);
+ //display.setFont (&FreeMonoBold12pt7b);
     
 }
 
@@ -135,17 +140,17 @@ barometricSensor.setResolution(ms5637_resolution_osr_8192);
 void drawBar (float nPer){
 
   if(nPer < LastPercent){
-   display.fillRect(131, 50 + (100-LastPercent), 10, LastPercent - nPer,  WHITE);     
+   display.fillRect(1, 50 + (100-LastPercent), 10, LastPercent - nPer,  WHITE);     
   }
   else{
-   display.fillRect(131, 50 + (100-nPer), 10, nPer - LastPercent,  BLACK);
+   display.fillRect(1, 50 + (100-nPer), 10, nPer - LastPercent,  BLACK);
   }    
   LastPercent = nPer;  
 }
 void loop ( ) 
 {
      display.setCursor(5,25);
-     display.fillRect(0, 0, 130, 100, WHITE);
+     display.fillRect(12, 0, 130, 100, WHITE);
     //  display.setTextColor(WHITE,WHITE);
     //display.print(buf);
       //display.clearDisplay();
@@ -215,22 +220,28 @@ void loop ( )
           }
     }
   } 
-      display.setCursor(5,35);
+      display.setCursor(18,35);
     display.setTextColor(BLACK,WHITE);
-dtostrf (vario, 5, 2, buf);
+    display.setFont (&FreeMonoBold18pt7b);
+    dtostrf (vario, 5, 2, buf);
 //Serial.println (variobuf);
-display.setTextSize(3);
+    display.setTextSize(1);
     display.print (buf);
-    display.setTextSize(2);
+    display.setFont ();
+    display.setTextSize(1);
     display.print ("m/s");
-    display.setCursor(5,80);
-    display.setTextSize(4);
-    dtostrf (baltitude, 4,0, buf);
-      display.print (buf);display.setTextSize(2);display.print ("m");
-     display.setTextSize(2);
-    display.setCursor(5,125);
+    
+      display.setCursor(15,80);
+      display.setFont (&FreeMonoBold24pt7b);
+      dtostrf (baltitude, 4,0, buf);
+      display.print (buf);
+      display.setFont ();
+      display.setTextSize(1);display.print ("m");
+      
+    display.setTextSize(2);
+    display.setCursor(25,125);
     display.print (pressure);
-    display.setCursor(5,140);
+    display.setCursor(25,140);
     display.print (temperature);
 
 
