@@ -15,6 +15,7 @@ http://taturno.com/code/VariometroV2.pde
 #include <Fonts/FreeMonoBold24pt7b.h>
 #include <Fonts/FreeMonoBold12pt7b.h>
 #include <avr/dtostrf.h>
+#include <pins_arduino.h>
 
 // any pins can be used  - DO NOT use real SPI!
 #define SHARP_SCK  4//9
@@ -34,6 +35,7 @@ Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 144, 168);
 MS5637 barometricSensor;
 
 /////
+float bat_percentage;
 char buf [4]; // buffer for dtostrf
 int buzzPin = 2;
 int interval=50; //100
@@ -54,9 +56,6 @@ float newPercent = 0;
 float startingPressure = 0.0;
 unsigned long time = 0;
 
-float toneFreq, toneFreqLowpass, pressure, lowpassFast, lowpassSlow ;
-
-int ddsAcc;
 float calcAltitude(float pressure){
 
   float A = pressure/1013.25;
@@ -68,6 +67,8 @@ float calcAltitude(float pressure){
   }
 
 void setup(void) {
+ 
+  
   Serial.begin(9600);
    //while (!Serial);
   Serial.println("minimal Audio vario");
@@ -98,16 +99,7 @@ display.clearDisplay();
 barometricSensor.setResolution(ms5637_resolution_osr_8192);
 //barometricSensor.setResolution(ms5637_resolution_osr_4096);
   
- /** //Take 16 readings and average them
-  startingPressure = 0.0;
-  for (int x = 0 ; x < 16 ; x++)
-    startingPressure += barometricSensor.getPressure();
-  startingPressure /= (float)16;
-  Serial.print("Starting pressure=");
-  Serial.print(startingPressure);
-  Serial.println("hPa");    
- pressure = barometricSensor.getPressure();
-  lowpassFast = lowpassSlow = pressure;*/
+
    display.setRotation(0);
    display.setTextSize(2);
   display.setTextColor(BLACK);
@@ -124,8 +116,37 @@ void drawBar (float nPer){
   else{
    display.fillRect(1, 50 + (100-nPer), 10, nPer - LastPercent,  BLACK);
   }    
+
   LastPercent = nPer;  
-}
+
+  }
+
+  //-------------measure internal battery voltage
+
+  float read_battery_percentage (){
+        analogReadResolution(10);
+analogReference(AR_INTERNAL1V0); //AR_DEFAULT: the default analog reference of 3.3V // AR_INTERNAL1V0: a built-in 1.0V reference
+// read the input on analog pin 0:
+  int sensorValue = analogRead(ADC_BATTERY);
+  // Convert the analog reading (which goes from 0 - 1023) 
+  //float voltage = ((sensorValue * 3.3) / 1023.0);
+  float voltage = sensorValue * (3.25 / 1023.0);
+  // print out the value you read:
+ // Serial.print("Voltage: ");
+  //Serial.print(voltage);
+  //Serial.println("V");
+
+  float battery_percentage = ((voltage * 100) / 3.3);
+ 
+
+  //Serial.print("Batery Percentage: ");
+  //Serial.print(battery_percentage);
+ // Serial.println("%");
+
+    //return battery_percentage;
+    return voltage;
+  }
+
 void loop ( ) 
 {
    
@@ -214,11 +235,15 @@ void loop ( )
     //display.setFont (&FreeMonoBold12pt7b);
     display.setCursor(25,120);
     dtostrf (temperature, 5,2, buf);
-    display.print (buf);display.setTextSize(1); display.print (char(247));display.print ("C");
+    display.print (buf);display.setTextSize(2); display.print (char(247));//display.print ("C");
     //print pressure
     display.setTextSize(2);
     display.setCursor(25,145);
     display.print (pressure);
+    
+    display.setTextSize(1);
+    dtostrf (read_battery_percentage(), 1,2, buf);
+    display.print (buf);display.print ("V");
     
 // draw vario bar graph
   newPercent = int((vario/3)* 100.0);
@@ -228,44 +253,4 @@ void loop ( )
 }
 }
 
-/*
- * 
- * #include <pins_arduino.h>
- void loop() {
-
-  analogReadResolution(10);
-  analogReference(AR_INTERNAL1V0); //AR_DEFAULT: the default analog reference of 3.3V // AR_INTERNAL1V0: a built-in 1.0V reference
-  
-  // read the input on analog pin 0:
-  int sensorValue = analogRead(ADC_BATTERY);
-  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 4.3V):
-  float voltage = sensorValue * (3.25 / 1023.0);
-  // print out the value you read:
-  Serial.print(voltage);
-  Serial.println("V");
-------------------------------------------------------------------------------
-  float battery_voltage = 3.01; // use voltmeter
-
-analogReadResolution(10);
-  analogReference(AR_INTERNAL1V0); //AR_DEFAULT: the default analog reference of 3.3V // 
-AR_INTERNAL1V0: a built-in 1.0V reference
-  // read the input on analog pin 0:
-  int sensorValue = analogRead(ADC_BATTERY);
-  // Convert the analog reading (which goes from 0 - 1023) 
-  float voltage = sensorValue * (battery_voltage / 1023.0);
-  // print out the value you read:
-  Serial.print("Voltage: ");
-  Serial.print(voltage);
-  Serial.println("V");
-
-  float battery_percentage = ((voltage * 100) / battery_voltage);
-
-  Serial.print("Batery Percentage: ");
-  Serial.print(battery_percentage);
-  Serial.println("%");
-
-  analogReference(AR_DEFAULT);
-
-
-}*/
 
