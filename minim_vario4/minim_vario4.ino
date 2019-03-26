@@ -45,17 +45,11 @@ float alt[51];
 float tim[51];
 float beep;
 float Beep_period;
-float varioold = 0;
-
 float LastPercent = 0;
-
 float newPercent = 0;
-
-///
-
 float startingPressure = 0.0;
 unsigned long time = 0;
-
+/////////////////////////////////////////////////
 float calcAltitude(float pressure){
 
   float A = pressure/1013.25;
@@ -65,8 +59,9 @@ float calcAltitude(float pressure){
   C = C /0.0000225577;
   return C;
   }
+/////////////////////////////////////////////////
 
-void setup(void) {
+void setup() {
  
   
   Serial.begin(9600);
@@ -128,25 +123,20 @@ void drawBar (float nPer){
 analogReference(AR_INTERNAL1V0); //AR_DEFAULT: the default analog reference of 3.3V // AR_INTERNAL1V0: a built-in 1.0V reference
 // read the input on analog pin 0:
   int sensorValue = analogRead(ADC_BATTERY);
-  // Convert the analog reading (which goes from 0 - 1023) 
   //float voltage = ((sensorValue * 3.3) / 1023.0);
   float voltage = sensorValue * (3.25 / 1023.0);
   // print out the value you read:
  // Serial.print("Voltage: ");
   //Serial.print(voltage);
   //Serial.println("V");
-
   float battery_percentage = ((voltage * 100) / 3.3);
- 
-
   //Serial.print("Batery Percentage: ");
-  //Serial.print(battery_percentage);
+ //Serial.print(battery_percentage);
  // Serial.println("%");
-
-    //return battery_percentage;
+ //return battery_percentage;
     return voltage;
   }
-
+//---------------------------------------------------------------------------------
 void loop ( ) 
 {
    
@@ -206,7 +196,7 @@ void loop ( )
           }
     }
   } 
-
+//------------------------Screen update----------------------
 //Clear screen
   display.setCursor(5,25);
   display.fillRect(12, 0, 150, 180, WHITE);
