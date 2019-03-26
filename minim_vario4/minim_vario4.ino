@@ -215,7 +215,7 @@ void loop ( )
     display.setTextColor(BLACK,WHITE);
     display.setFont (&FreeMonoBold18pt7b);
     dtostrf (vario,5, 2, buf);
-//Serial.println (variobuf);
+Serial.println (buf);
     display.setTextSize(1);
     display.print (buf);
     display.setFont ();
