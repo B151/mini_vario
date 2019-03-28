@@ -152,7 +152,8 @@ void loop ( )
     alt[(cc-1)]=alt[cc];
     tim[(cc-1)]=tim[cc];
   }
-  alt[maxsamples]=baltitude;
+  //alt[maxsamples]=baltitude;
+  alt[maxsamples]=temperature;
   tim[maxsamples]=tempo;
   
   // Linear interpolation (least squares) to determine the vertical variation rate 
