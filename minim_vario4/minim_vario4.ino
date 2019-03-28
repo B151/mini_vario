@@ -38,7 +38,7 @@ MS5637 barometricSensor;
 float bat_percentage;
 char buf [4]; // buffer for dtostrf
 int buzzPin = 2;
-int interval=50; //100
+int interval=100; //100
 int samples=40;//40
 int maxsamples=50;//50
 float alt[51];
